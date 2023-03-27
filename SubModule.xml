@@ -1,0 +1,32 @@
+<Module>
+  <Name value="SandboxFamily"/>
+  <Id value="SandboxFamily"/>
+  <Version value="v1.0.0"/>
+  <SingleplayerModule value="true"/>
+  <MultiplayerModule value="false"/>
+  <DependedModules>
+    <DependedModule DependentVersion="v1.1.2" Id="Native" />
+    <DependedModule DependentVersion="v1.1.2" Id="SandBoxCore" />
+    <DependedModule DependentVersion="v1.1.2" Id="Sandbox" />
+  </DependedModules>
+  <SubModules>
+    <SubModule>
+      <Name value="SandboxFamily"/>
+      <DLLName value="SandboxFamily.dll"/>
+      <SubModuleClassType value="SandboxFamily.SandboxFamily"/>
+      <Tags>
+        <Tag key="DedicatedServerType" value="none" />
+        <Tag key="IsNoRenderModeElement" value="false" />
+      </Tags>
+    </SubModule>
+  </SubModules>
+  <Xmls>
+    <XmlNode>
+      <XmlName id="NPCCharacters" path="sibling_preset"/>
+      <IncludedGameTypes>
+        <GameType value = "Campaign"/>
+        <GameType value = "Sandbox"/>
+      </IncludedGameTypes>
+    </XmlNode>
+  </Xmls>
+</Module>

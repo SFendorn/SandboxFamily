@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<NPCCharacters>
+  <NPCCharacter id="player_sister_template" default_group="Infantry" age="19" is_hero="true" is_female="true" culture="Culture.battania" name="{=!}(Sister name set by culture)" occupation="Lord">
+    <face>
+      <BodyProperties version="4" key="000B1C07000030014576655364244569B39588A9D7D65504C9A86FD7875464370280D624F8A5973400000000000000000000000000000000000000006D1C1003" />
+    </face>
+    <skills>
+    </skills>
+    <Traits>
+    </Traits>
+    <Equipments>
+      <EquipmentRoster>
+        <equipment slot="Item0" id="Item.empire_sword_1_t2" />
+        <equipment slot="Body" id="Item.heavy_nordic_tunic" />
+        <equipment slot="Leg" id="Item.strapped_shoes" />
+      </EquipmentRoster>
+      <EquipmentRoster civilian="true">
+        <equipment slot="Item0" id="Item.empire_sword_1_t2" />
+        <equipment slot="Body" id="Item.tunic_with_rolled_cloth" />
+        <equipment slot="Leg" id="Item.strapped_shoes" />
+      </EquipmentRoster>
+    </Equipments>
+  </NPCCharacter>
+</NPCCharacters>
