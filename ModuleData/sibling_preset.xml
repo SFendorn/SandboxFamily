@@ -21,4 +21,25 @@
       </EquipmentRoster>
     </Equipments>
   </NPCCharacter>
+  <NPCCharacter id="player_brother_template" default_group="Infantry" age="19" is_hero="true" is_female="false" culture="Culture.battania" name="{=!}(Brother name set by culture)" occupation="Lord">
+    <face>
+      <BodyProperties version="4" key="0005440580BC200266EA9979568344848885462866B3674479986B98949492360003365303678747000000000000000000000000000000000000000000F40081" />
+    </face>
+    <skills>
+    </skills>
+    <Traits>
+    </Traits>
+    <Equipments>
+      <EquipmentRoster>
+        <equipment slot="Item0" id="Item.empire_sword_1_t2" />
+        <equipment slot="Body" id="Item.heavy_nordic_tunic" />
+        <equipment slot="Leg" id="Item.strapped_shoes" />
+      </EquipmentRoster>
+      <EquipmentRoster civilian="true">
+        <equipment slot="Item0" id="Item.empire_sword_1_t2" />
+        <equipment slot="Body" id="Item.tunic_with_rolled_cloth" />
+        <equipment slot="Leg" id="Item.strapped_shoes" />
+      </EquipmentRoster>
+    </Equipments>
+  </NPCCharacter>
 </NPCCharacters>

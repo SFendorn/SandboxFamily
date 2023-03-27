@@ -234,6 +234,7 @@
     <Compile Include="SandboxFamily.cs" />
     <Compile Include="SandboxFamilyBehavior.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SandboxFamilyModel.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
