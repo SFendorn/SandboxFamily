@@ -96,7 +96,7 @@ namespace SandboxFamily
         private static bool IsAdult(Hero hero)
         {
             int heroComesOfAge = Campaign.Current.Models.AgeModel.HeroComesOfAge;
-            return heroComesOfAge < hero.Age || (heroComesOfAge == hero.Age && CampaignTime.Now.GetDayOfYear < hero.BirthDay.GetDayOfYear);
+            return heroComesOfAge < hero.Age || (heroComesOfAge == hero.Age && hero.BirthDay.GetDayOfYear < CampaignTime.Now.GetDayOfYear);
         }
 
         // taken from HeroGenerator.AddRandomVarianceToTraits
