@@ -95,10 +95,10 @@ namespace SandboxFamily
                 }
                 else
                 {
-                    family.Add(new FamilyMemberData(!Hero.MainHero.IsFemale, 2f, FamilyMemberData.RelationToMain.Spouse));
+                    family.Add(new FamilyMemberData(!Hero.MainHero.IsFemale, 2.1f, FamilyMemberData.RelationToMain.Spouse));
                     family.Add(new FamilyMemberData(true, -18.5f, FamilyMemberData.RelationToMain.Child));
-                    family.Add(new FamilyMemberData(true, -20f, FamilyMemberData.RelationToMain.Child));
-                    family.Add(new FamilyMemberData(true, -21.9f, FamilyMemberData.RelationToMain.Child));
+                    family.Add(new FamilyMemberData(true, -19.8f, FamilyMemberData.RelationToMain.Child));
+                    family.Add(new FamilyMemberData(true, -21.7f, FamilyMemberData.RelationToMain.Child));
                 }
             }
         }
