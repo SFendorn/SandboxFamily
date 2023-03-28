@@ -90,7 +90,6 @@ namespace SandboxFamily
         private static void GenerateFamilyData()
         {
             family = new List<FamilyMemberData>();
-            bool fallbackToDefault = true;
             string path = @"..\..\Modules\SandboxFamily\config.txt";
             if (File.Exists(path))
             {
@@ -138,15 +137,10 @@ namespace SandboxFamily
                         }
                     }
                 }
-                // Ensure that the spouse comes before potential children
-                family.Sort((x, y) => x.relationToMain.CompareTo(y.relationToMain));
-                fallbackToDefault = !ValidateCustomFamily();
             }
-            
-            if (fallbackToDefault)
+            else
             {
-                family.Clear();
-                // Default settings (my personal taste)
+                // Default settings
                 if (Hero.MainHero.Age < 38)
                 {
                     family.Add(new FamilyMemberData(true, 2.1f, FamilyMemberData.RelationToMain.Sibling));
@@ -159,6 +153,13 @@ namespace SandboxFamily
                     family.Add(new FamilyMemberData(true, -19.8f, FamilyMemberData.RelationToMain.Child));
                     family.Add(new FamilyMemberData(true, -21.7f, FamilyMemberData.RelationToMain.Child));
                 }
+            }
+
+            // Ensure that the spouse will be created before potential children
+            family.Sort((x, y) => x.relationToMain.CompareTo(y.relationToMain));
+            if (!ValidateCustomFamily())
+            {
+                family.Clear();
             }
         }
 
@@ -190,11 +191,44 @@ namespace SandboxFamily
                 if (hasChildren && hasSpouse)
                 {
                     float youngerParentAge = Math.Min(Hero.MainHero.Age, Hero.MainHero.Age + family.Find(x => x.relationToMain == FamilyMemberData.RelationToMain.Spouse).ageOffset);
-                    bool childrenAgeDifferenceValid = family.All(x => x.relationToMain != FamilyMemberData.RelationToMain.Child || 18f < (youngerParentAge + x.ageOffset));
+                    bool childrenAgeDifferenceValid = family.All(x => x.relationToMain != FamilyMemberData.RelationToMain.Child || 18f < (youngerParentAge - (Hero.MainHero.Age + x.ageOffset)));
                     if (!childrenAgeDifferenceValid)
                     {
                         sw.WriteLine("The age distance between parents and children needs to be at least 18");
                         return false;
+                    }
+                }
+
+                const float siblingMinAgeDifference = 0.9f;
+                foreach (var sibling in family.Where(x => x.relationToMain == FamilyMemberData.RelationToMain.Sibling))
+                {
+                    if (sibling.ageOffset != 0f && Math.Abs(sibling.ageOffset) < siblingMinAgeDifference)
+                    {
+                        sw.WriteLine("The age distance between siblings needs to be 0 or at least 0.9");
+                        return false;
+                    }
+
+                    foreach (var sibling2 in family.Where(x => x != sibling && x.relationToMain == FamilyMemberData.RelationToMain.Sibling))
+                    {
+                        float siblingsAgeOffset = sibling.ageOffset - sibling2.ageOffset;
+                        if (siblingsAgeOffset != 0f && Math.Abs(siblingsAgeOffset) < siblingMinAgeDifference)
+                        {
+                            sw.WriteLine("The age distance between siblings needs to be 0 or at least 0.9");
+                            return false;
+                        }
+                    }
+                }
+
+                foreach (var child in family.Where(x => x.relationToMain == FamilyMemberData.RelationToMain.Child))
+                {
+                    foreach (var child2 in family.Where(x => x != child && x.relationToMain == FamilyMemberData.RelationToMain.Child))
+                    {
+                        float siblingsAgeOffset = child.ageOffset - child2.ageOffset;
+                        if (siblingsAgeOffset != 0f && Math.Abs(siblingsAgeOffset) < siblingMinAgeDifference)
+                        {
+                            sw.WriteLine("The age distance between children needs to be 0 or at least 0.9");
+                            return false;
+                        }
                     }
                 }
             }
