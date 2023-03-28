@@ -14,34 +14,6 @@ namespace SandboxFamily
             public RelationToMain relationToMain;
             public string template;
 
-            private static readonly List<int> s_femaleHairStyles = new List<int>
-            {
-                (int)FacesFemaleHair.Long_over_shoulder,
-                (int)FacesFemaleHair.Tied_long_over_shoulder,
-                //(int)FacesFemaleHair.Above_shoulder_length,
-                (int)FacesFemaleHair.Tied_in_back,
-                (int)FacesFemaleHair.Shoulder_length_tied,
-                (int)FacesFemaleHair.Braided_above_ears,
-                (int)FacesFemaleHair.Ukrainian,
-                15,
-                16,
-            };
-            private static readonly List<int> s_maleHairStyles = new List<int>
-            {
-                (int)FacesMaleHair.Ponytail,
-                (int)FacesMaleHair.LongAndBushy,
-                (int)FacesMaleHair.TiedAcrossBack,
-                (int)FacesMaleHair.SlickedShort,
-                (int)FacesMaleHair.PartedAndCombedBack,
-                (int)FacesMaleHair.Tousled,
-                (int)FacesMaleHair.BraidedAndLong,
-                (int)FacesMaleHair.Short,
-                (int)FacesMaleHair.HighPonytail,
-                (int)FacesMaleHair.PageBoy,
-                (int)FacesMaleHair.ShortAndThin,
-                (int)FacesMaleHair.SlickedLong
-            };
-
             public FamilyMemberData(bool isFemale, float ageOffset, RelationToMain relationToMain)
             {
                 this.isFemale = isFemale;
@@ -84,18 +56,17 @@ namespace SandboxFamily
                 // We do not need to change the spouse here, because it uses a fixed preset and is unique.
                 if (relationToMain != RelationToMain.Spouse)
                 {
-                    // The random generation which is attempted here does not work currently.
+                    // The random generation which is attempted here seems to work only if there is a FaceGen instance active,
+                    // which is currently only the case during character creation. It is imperative to call the Create function during OnCharacterCreationIsOverEvent.
                     // This seems to be a bug in the main game, which has been confirmed by TaleWorlds.
                     // This code is similar to the code that is used during HeroCreator.DeliverOffSpring and HeroCreator.CreateRelativeNotableHero.
-                    // Those two functions should produce randomized characters, but the characters look very similar to their same-gender parent.
+                    // Those two functions should always produce randomized characters, but the characters look very similar to their same-gender parent
+                    // and identical to each other if there are multiple same-gender children (e.g. born during regular gameplay).
                     // See https://forums.taleworlds.com/index.php?threads/same-gender-children-of-the-same-parents-are-all-clones.450790/
                     BodyProperties bodyPropertiesMin = new BodyProperties(new DynamicBodyProperties(hero.Age, hero.Weight + MBRandom.RandomFloatRanged(-0.1f, 0f), hero.Build + MBRandom.RandomFloatRanged(-0.1f, 0)), hero.Mother.BodyProperties.StaticProperties);
                     BodyProperties bodyPropertiesMax = new BodyProperties(new DynamicBodyProperties(hero.Age, hero.Weight + MBRandom.RandomFloatRanged(0f, 0.1f), hero.Build + MBRandom.RandomFloatRanged(0, 0.1f)), hero.Father.BodyProperties.StaticProperties);
                     BodyProperties randomBodyProperties = BodyProperties.GetRandomBodyProperties(hero.CharacterObject.Race, hero.IsFemale, bodyPropertiesMin, bodyPropertiesMax, 1, MBRandom.RandomInt(), hero.HairTags, hero.BeardTags, hero.TattooTags);
                     hero.ModifyPlayersFamilyAppearance(randomBodyProperties.StaticProperties);
-                    hero.Weight = randomBodyProperties.Weight;
-                    hero.Build = randomBodyProperties.Build;
-                    hero.ModifyHair(isFemale ? s_femaleHairStyles.GetRandomElement() : s_maleHairStyles.GetRandomElement(), 0, 0);
                 }
                 return hero;
             }

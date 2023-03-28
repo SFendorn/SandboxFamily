@@ -18,7 +18,7 @@ namespace SandboxFamily
 
         public override void RegisterEvents()
         {
-            CampaignEvents.SettlementEntered.AddNonSerializedListener(this, new Action<MobileParty, Settlement, Hero>(AddPlayerFamily));
+            CampaignEvents.OnCharacterCreationIsOverEvent.AddNonSerializedListener(this, new Action(CreatePlayerFamily));
             CampaignEvents.OnSettlementLeftEvent.AddNonSerializedListener(this, new Action<MobileParty, Settlement>(LevelPlayerFamily));
         }
 
@@ -28,9 +28,9 @@ namespace SandboxFamily
             dataStore.SyncData("PlayerFamilyLeveled", ref isLeveled);
         }
 
-        public void AddPlayerFamily(MobileParty party, Settlement settlement, Hero hero)
+        public void CreatePlayerFamily()
         {
-            if (!isCreated && Hero.MainHero == hero)
+            if (!isCreated)
             {
                 isCreated = true;
                 foreach(var familyMemberData in SandboxFamilyModel.Family)
@@ -40,7 +40,7 @@ namespace SandboxFamily
                     RandomizeTraits(familyMemberHero, Hero.MainHero);
                     CampaignEventDispatcher.Instance.OnHeroCreated(familyMemberHero);
                     familyMemberHero.ChangeState(Hero.CharacterStates.Active);
-                    EnterSettlementAction.ApplyForCharacterOnly(familyMemberHero, settlement);
+                    EnterSettlementAction.ApplyForCharacterOnly(familyMemberHero, Hero.MainHero.BornSettlement);
                 }
             }
         }
