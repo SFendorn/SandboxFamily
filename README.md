@@ -4,7 +4,7 @@ Configurable starting family mod in sandbox mode for Mount &amp; Blade II: Banne
 ## Content
 Ever dreamt of a family in sandbox mode? With this mod you can customize your starting family to your liking.
 
-The default family consists of two sisters if the player character is 20 or 30 years old, or three daughters and a spouse if the player character is 40 or 50 years old. The family members are added during game startup and are placed in the town of birth of the player character, i.e. the town in front of which you start the game. They start at level 1 but get attribute and focus points based on their age, which is equivalent to the player character creation.
+The default family consists of two sisters if the player character is 20 or 30 years old, or three daughters and a spouse if the player character is 40 or 50 years old. The family members are added during game startup and are placed in the town of birth of the player character, i.e. the town in front of which you start the game. They start at level 0 but get attribute and focus points based on their age, which is equivalent to the player character creation.
 
 **Important**: If you want the new family members to have starting skill points in the same way as the main character gets them during character creation (10 skill points per focus point spent), you need to distribute the focus points of your family members before they level up from 0 to 1. At this point, the mod checks if the custom family members have any focus points distributed and assigns skill points accordingly. This is a unique event which is not repeatable. If you miss it, they keep their 0 skill points in all skills.
 
