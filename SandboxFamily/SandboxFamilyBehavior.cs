@@ -35,7 +35,7 @@ namespace SandboxFamily
                 {
                     Hero familyMemberHero = familyMemberData.Create();
                     ResetToLevel1(familyMemberHero);
-                    RandomizeTraits(familyMemberHero, Hero.MainHero);
+                    RandomizeTraits(familyMemberHero);
                     CampaignEventDispatcher.Instance.OnHeroCreated(familyMemberHero);
                     familyMemberHero.ChangeState(Hero.CharacterStates.Active);
                     EnterSettlementAction.ApplyForCharacterOnly(familyMemberHero, Hero.MainHero.BornSettlement);
@@ -95,9 +95,10 @@ namespace SandboxFamily
             return heroComesOfAge < hero.Age || (heroComesOfAge == hero.Age && hero.BirthDay.GetDayOfYear < CampaignTime.Now.GetDayOfYear);
         }
 
-        // taken from HeroGenerator.AddRandomVarianceToTraits
-        private static void RandomizeTraits(Hero hero, Hero template)
+        // Similar to HeroGenerator.AddRandomVarianceToTraits
+        private static void RandomizeTraits(Hero hero)
         {
+            Hero template = hero;
             foreach (TraitObject trait in TraitObject.All)
             {
                 if (trait != DefaultTraits.Honor && trait != DefaultTraits.Mercy && trait != DefaultTraits.Generosity && trait != DefaultTraits.Valor && trait != DefaultTraits.Calculating)
@@ -105,29 +106,22 @@ namespace SandboxFamily
                     continue;
                 }
 
-                int num = template.GetTraitLevel(trait);
-                float num2 = MBRandom.RandomFloat;
+                if (hero.Mother != null && hero.Father != null)
+                    template = MBRandom.RandomInt(0, 100) > 50 ? hero.Mother : hero.Father;
 
-                if ((double)num2 < 0.20)
+                int traitLevel = template.GetTraitLevel(trait);
+                float randomPercent = MBRandom.RandomInt(0, 100);
+                if (randomPercent < 15)
                 {
-                    num--;
-                    if (num < -1)
-                    {
-                        num = -1;
-                    }
+                    traitLevel = Math.Max(traitLevel - 1, -1);
+                }
+                else if (randomPercent > 85)
+                {
+                    traitLevel = Math.Min(traitLevel + 1, 1);
                 }
 
-                if ((double)num2 > 0.80)
-                {
-                    num++;
-                    if (num > 1)
-                    {
-                        num = 1;
-                    }
-                }
-
-                num = MBMath.ClampInt(num, trait.MinValue, trait.MaxValue);
-                hero.SetTraitLevel(trait, num);
+                traitLevel = MBMath.ClampInt(traitLevel, trait.MinValue, trait.MaxValue);
+                hero.SetTraitLevel(trait, traitLevel);
             }
         }
     }
