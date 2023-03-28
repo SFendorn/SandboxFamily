@@ -184,7 +184,7 @@ namespace SandboxFamily
                 bool allAdults = family.All(x => 18f <= Hero.MainHero.Age + x.ageOffset);
                 if (!allAdults)
                 {
-                    sw.WriteLine("All family members need to be at least 18");
+                    sw.WriteLine("All family members need to be at least 18 years old");
                     return false;
                 }
 
