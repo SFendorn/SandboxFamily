@@ -1,4 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 
@@ -12,7 +17,7 @@ namespace SandboxFamily
             public bool isFemale;
             public float ageOffset;
             public RelationToMain relationToMain;
-            public string template;
+            private readonly string template;
 
             public FamilyMemberData(bool isFemale, float ageOffset, RelationToMain relationToMain)
             {
@@ -85,10 +90,64 @@ namespace SandboxFamily
         private static void GenerateFamilyData()
         {
             family = new List<FamilyMemberData>();
-            bool isDefault = true;
-            if (isDefault)
+            bool fallbackToDefault = true;
+            string path = @"..\..\Modules\SandboxFamily\config.txt";
+            if (File.Exists(path))
             {
-                if (Hero.MainHero.Age < 35)
+                using (StreamReader sr = File.OpenText(path))
+                {
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        FamilyMemberData.RelationToMain? relationToMain = null;
+                        bool? isFemale = null;
+                        float? ageOffset = null;
+                        if (Regex.IsMatch(line, "spouse", RegexOptions.IgnoreCase))
+                        {
+                            relationToMain = FamilyMemberData.RelationToMain.Spouse;
+                            isFemale = !Hero.MainHero.IsFemale;
+                        }
+                        else if (Regex.IsMatch(line, "sister", RegexOptions.IgnoreCase))
+                        {
+                            relationToMain = FamilyMemberData.RelationToMain.Sibling;
+                            isFemale = true;
+                        }
+                        else if (Regex.IsMatch(line, "brother", RegexOptions.IgnoreCase))
+                        {
+                            relationToMain = FamilyMemberData.RelationToMain.Sibling;
+                            isFemale = false;
+                        }
+                        else if (Regex.IsMatch(line, "daughter", RegexOptions.IgnoreCase))
+                        {
+                            relationToMain = FamilyMemberData.RelationToMain.Child;
+                            isFemale = true;
+                        }
+                        else if (Regex.IsMatch(line, "son", RegexOptions.IgnoreCase))
+                        {
+                            relationToMain = FamilyMemberData.RelationToMain.Child;
+                            isFemale = false;
+                        }
+                        Match match = Regex.Match(line, @"-?\d+\.?\d*", RegexOptions.IgnoreCase);
+                        if (match.Success)
+                        {
+                            ageOffset = float.Parse(match.Value, CultureInfo.InvariantCulture.NumberFormat);
+                        }
+                        if (relationToMain.HasValue && isFemale.HasValue && ageOffset.HasValue)
+                        {
+                            family.Add(new FamilyMemberData(isFemale.Value, ageOffset.Value, relationToMain.Value));
+                        }
+                    }
+                }
+                // Ensure that the spouse comes before potential children
+                family.Sort((x, y) => x.relationToMain.CompareTo(y.relationToMain));
+                fallbackToDefault = !ValidateCustomFamily();
+            }
+            
+            if (fallbackToDefault)
+            {
+                family.Clear();
+                // Default settings (my personal taste)
+                if (Hero.MainHero.Age < 38)
                 {
                     family.Add(new FamilyMemberData(true, 2.1f, FamilyMemberData.RelationToMain.Sibling));
                     family.Add(new FamilyMemberData(true, -1.5f, FamilyMemberData.RelationToMain.Sibling));
@@ -101,6 +160,45 @@ namespace SandboxFamily
                     family.Add(new FamilyMemberData(true, -21.7f, FamilyMemberData.RelationToMain.Child));
                 }
             }
+        }
+
+        private static bool ValidateCustomFamily()
+        {
+            using (StreamWriter sw = File.CreateText(@"..\..\Modules\SandboxFamily\error.log"))
+            {
+                if (family.IsEmpty())
+                {
+                    sw.WriteLine("No valid family member has been found in config.txt");
+                    return false;
+                }
+
+                bool hasSpouse = family.Any(x => x.relationToMain == FamilyMemberData.RelationToMain.Spouse);
+                bool hasChildren = family.Any(x => x.relationToMain == FamilyMemberData.RelationToMain.Child);
+                if (hasChildren && !hasSpouse)
+                {
+                    sw.WriteLine("Cannot have children without a spouse");
+                    return false;
+                }
+
+                bool allAdults = family.All(x => 18f <= Hero.MainHero.Age + x.ageOffset);
+                if (!allAdults)
+                {
+                    sw.WriteLine("All family members need to be at least 18");
+                    return false;
+                }
+
+                if (hasChildren && hasSpouse)
+                {
+                    float youngerParentAge = Math.Min(Hero.MainHero.Age, Hero.MainHero.Age + family.Find(x => x.relationToMain == FamilyMemberData.RelationToMain.Spouse).ageOffset);
+                    bool childrenAgeDifferenceValid = family.All(x => x.relationToMain != FamilyMemberData.RelationToMain.Child || 18f < (youngerParentAge + x.ageOffset));
+                    if (!childrenAgeDifferenceValid)
+                    {
+                        sw.WriteLine("The age distance between parents and children needs to be at least 18");
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
     }
 }
