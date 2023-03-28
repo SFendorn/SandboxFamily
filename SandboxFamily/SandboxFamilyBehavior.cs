@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Linq;
+using System.Collections.Generic;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Actions;
 using TaleWorlds.CampaignSystem.CharacterDevelopment;
 using TaleWorlds.CampaignSystem.Extensions;
-using TaleWorlds.CampaignSystem.Party;
-using TaleWorlds.CampaignSystem.Settlements;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
 
@@ -14,18 +12,18 @@ namespace SandboxFamily
     public class SandboxFamilyBehavior : CampaignBehaviorBase
     {
         private bool isCreated = false;
-        private bool isLeveled = false;
+        private Dictionary<string, bool> familyMemberHasLeveled = new Dictionary<string, bool>();
 
         public override void RegisterEvents()
         {
             CampaignEvents.OnCharacterCreationIsOverEvent.AddNonSerializedListener(this, new Action(CreatePlayerFamily));
-            CampaignEvents.OnSettlementLeftEvent.AddNonSerializedListener(this, new Action<MobileParty, Settlement>(LevelPlayerFamily));
+            CampaignEvents.HeroLevelledUp.AddNonSerializedListener(this, new Action<Hero, bool>(ApplyInitialSkillLevels));
         }
 
         public override void SyncData(IDataStore dataStore)
         {
             dataStore.SyncData("PlayerFamilyCreated", ref isCreated);
-            dataStore.SyncData("PlayerFamilyLeveled", ref isLeveled);
+            dataStore.SyncData("PlayerFamilyLeveled", ref familyMemberHasLeveled);
         }
 
         public void CreatePlayerFamily()
@@ -41,23 +39,21 @@ namespace SandboxFamily
                     CampaignEventDispatcher.Instance.OnHeroCreated(familyMemberHero);
                     familyMemberHero.ChangeState(Hero.CharacterStates.Active);
                     EnterSettlementAction.ApplyForCharacterOnly(familyMemberHero, Hero.MainHero.BornSettlement);
+                    familyMemberHasLeveled.Add(familyMemberHero.StringId, false);
                 }
             }
         }
 
-        public void LevelPlayerFamily(MobileParty party, Settlement settlement)
+        public void ApplyInitialSkillLevels(Hero hero, bool shouldNotify)
         {
-            if (isCreated && !isLeveled && party.IsMainParty)
+            if (isCreated && hero.Level == 1 && hero.Clan == Clan.PlayerClan && familyMemberHasLeveled.TryGetValue(hero.StringId, out bool hasLeveled) && !hasLeveled)
             {
-                isLeveled = true;
-                foreach (var kin in Hero.MainHero.Clan.Heroes.Where(x => !x.IsHumanPlayerCharacter && x.Level == 0))
+                foreach (var skill in Skills.All)
                 {
-                    foreach (var skill in Skills.All)
-                    {
-                        int focus = kin.HeroDeveloper.GetFocus(skill);
-                        kin.HeroDeveloper.ChangeSkillLevel(skill, focus * 10, false);
-                    }
+                    int focus = hero.HeroDeveloper.GetFocus(skill);
+                    hero.HeroDeveloper.ChangeSkillLevel(skill, focus * 10, false);
                 }
+                familyMemberHasLeveled[hero.StringId] = true;
             }
         }
 
